@@ -7,6 +7,13 @@ WHERE
     SUBSTRING(title,1,3) = 'The'
 ORDER BY id;
 
+1.1
+SELECT
+    title
+FROM books
+WHERE left(title,3) = 'The'
+
+
 2.
 
 SELECT REPLACE(title,'The','***')
@@ -20,7 +27,7 @@ ORDER BY id;
 
 SELECT
     id,
-    concat((side * height)/2) as "area"
+    side * height/2 as "area"
 FROM
     triangles
 order by id
@@ -38,3 +45,23 @@ SELECT
     last_name,
     extract(YEAR FROM born)
 FROM authors
+
+
+6.
+SELECT
+    last_name,
+    TO_CHAR(born,'DD (Dy) Mon YYYY')
+FROM authors
+
+7.
+SELECT
+    title
+FROM books
+WHERE title Like '%Harry Potter%'
+
+
+може с клавишна комбинацция CTRL + SHIFT + K
+или Edit Button (писалката)-> Format SQL да се beautifier-нете заявката,
+а не ръчно. Като ако искате да иматe и табулацията на новия ред отивате
+ в File -> Preferences -> Query Tool ->SQL formatting -> Set True only:
+  Re_ident, Space around operators
