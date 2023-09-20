@@ -31,7 +31,7 @@ order by "Country Information"  ,"Currencies";
 -- 3.
 
 ALTER TABLE countries
-ADD COLUMN capital_code VARCHAR(2);
+ADD COLUMN capital_code CHAR(2);
 
 UPDATE countries
 SET capital_code = SUBSTRING(capital,1,2);
