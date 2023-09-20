@@ -37,17 +37,17 @@ UPDATE countries
 SET capital_code = SUBSTRING(capital,1,2);
 
 -- 4.
-
+SELECT
+    substring(description,5)
+FROM currencies;
+-- 5.
 SELECT
     substring("River Information",'[0-9]{1,4}')
 FROM view_river_info;
-
--- 5.
-
+-- 5.2
 SELECT
-    replace(mountain_range,'a','@') AS replace_a,
-    replace(mountain_range,'A','$') AS replace_A
-FROM mountains;
+    (regexp_matches("River Information",'([0-9]{1,4})'))[1]
+        FROM view_river_info;
 
 -- 6.
 SELECT
