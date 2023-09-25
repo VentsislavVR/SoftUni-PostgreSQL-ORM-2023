@@ -37,7 +37,7 @@ SELECT
     END AS "Category"
 FROM employees
 GROUP BY job_title
-ORDER BY "Category",job_tCOUNT
+ORDER BY "Category",job_title;
 
 
 -- 16.
