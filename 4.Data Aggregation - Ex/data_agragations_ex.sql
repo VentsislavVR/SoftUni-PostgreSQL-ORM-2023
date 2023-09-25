@@ -1,34 +1,34 @@
 -- 1.
 SELECT
-    count(*)
+    COUNT(*)
 from wizard_deposits;
 
 
 
 -- 2.
 SELECT
-    sum(deposit_amount) as "Total Amount"
+    SUM(deposit_amount) AS "Total Amount"
 from wizard_deposits;
 
 -- 3.
 SELECT
-    trunc(avg(magic_wand_size),3) as "Average Magic Wand Size"
+    ROUND(AVG(magic_wand_size),3) AS "Average Magic Wand Size"
 FROM wizard_deposits;
 
 -- 4.
 SELECT
-    round(min(deposit_charge),2) as "Minimum Deposit Charge"
+    MIN(deposit_charge) AS "Minimum Deposit Charge"
 FROM wizard_deposits;
 
 -- 5.
 SELECT
-    max(age) as "Maximum Age"
+    MAX(age) AS "Maximum Age"
 FROM wizard_deposits;
 
 -- 6.
 SELECT
     deposit_group,
-    sum(deposit_interest) as "Deposit Interest"
+    SUM(deposit_interest) AS "Deposit Interest"
 FROM wizard_deposits
 GROUP BY deposit_group
 ORDER BY "Deposit Interest" DESC;
@@ -36,10 +36,10 @@ ORDER BY "Deposit Interest" DESC;
 -- 7.
 SELECT
     magic_wand_creator,
-    min(magic_wand_size) as "Minimum Wand Size"
+    MIN(magic_wand_size) AS "Minimum Wand Size"
 FROM wizard_deposits
 GROUP BY magic_wand_creator
-order by "Minimum Wand Size"
+ORDER BY "Minimum Wand Size"
 LIMIT 5;
 
 
@@ -47,7 +47,7 @@ LIMIT 5;
 SELECT
     deposit_group,
     is_deposit_expired,
-    floor(avg(deposit_interest))
+    FLOOR(AVG(deposit_interest))
 FROM wizard_deposits
 WHERE deposit_start_date > '1985-01-01'
 GROUP BY deposit_group,is_deposit_expired
@@ -57,7 +57,7 @@ ORDER BY deposit_group DESC ,is_deposit_expired;
 -- 9.
 SELECT
     last_name,
-    count(notes) as "Notes with Dumbledore"
+    COUNT(notes) AS "Notes with Dumbledore"
 FROM wizard_deposits
 WHERE notes LIKE '%Dumbledore%'
 GROUP BY last_name;
@@ -65,21 +65,31 @@ GROUP BY last_name;
 -- 10.
 CREATE VIEW "view_wizard_deposits_with_expiration_date_before_1983_08_17" AS
 SELECT
-    concat(first_name,' ',last_name) as "Wizard Name",
-    deposit_start_date as "Start Date",
-    deposit_expiration_date as "Expiration Date",
-    deposit_amount as "Amount"
+--   first_name || ' ' || last_name AS "Wizard Name"
+    CONCAT(first_name,' ',last_name) AS "Wizard Name",
+    deposit_start_date AS "Start Date",
+    deposit_expiration_date AS "Expiration Date",
+    deposit_amount AS "Amount"
 FROM wizard_deposits
 WHERE deposit_expiration_date <= '1983-08-17'
 GROUP BY "Wizard Name","Start Date","Expiration Date","Amount"
 ORDER BY "Expiration Date" ;
-
-
-
+-- 10.1
+-- CREATE VIEW "view_wizard_deposits_with_expiration_date_before_1983_08_17" AS
+-- SELECT distinct
+-- --   first_name || ' ' || last_name AS "Wizard Name"
+--     CONCAT(first_name,' ',last_name) AS "Wizard Name",
+--     deposit_start_date AS "Start Date",
+--     deposit_expiration_date AS "Expiration Date",
+--     deposit_amount AS "Amount"
+-- FROM wizard_deposits
+-- WHERE deposit_expiration_date <= '1983-08-17'
+--
+-- ORDER BY "Expiration Date" ;
 -- 11.
 SELECT
     magic_wand_creator,
-    max(deposit_amount) as "Maximum Deposit Amount"
+    MAX(deposit_amount) as "Maximum Deposit Amount"
 
 FROM wizard_deposits
 GROUP BY magic_wand_creator

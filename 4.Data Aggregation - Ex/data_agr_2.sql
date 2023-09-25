@@ -9,6 +9,10 @@ SELECT
     SUM(CASE WHEN department_id = 7 THEN 1 ELSE 0 END) AS "Production"
 FROM employees;
 
+-- 13.1
+-- SELECT
+--     count(CASE WHEN department_id=1 THEN 1 ELSE 0 END) AS "Engenering"
+--         FROM employees
 -- 14.
 UPDATE employees
 SET
@@ -33,7 +37,7 @@ SELECT
     END AS "Category"
 FROM employees
 GROUP BY job_title
-ORDER BY "Category",job_title;
+ORDER BY "Category",job_tCOUNT
 
 
 -- 16.
@@ -53,18 +57,19 @@ WHERE
 -- 17.
 SELECT
     department_id,
-    count(first_name) as num_employees,
-    case
-    when avg(salary) > 50000 THEN 'Above average'
-    when avg(salary) <= 50000 THEN 'Below average'
-    end as salary_level
-from employees
+    COUNT(first_name) as num_employees,
+    CASE
+    WHEN AVG(salary) > 50000 THEN 'Above average'
+--     WHEN AVG(salary) <= 50000 THEN 'Below average'
+    ELSE 'Below average'
+    end AS salary_level
+FROM employees
 GROUP BY department_id
-HAVING  avg(salary) > 30000
+HAVING  AVG(salary) > 30000
 order by department_id;
 
 
--- 18.
+-- 18.# TODO
 CREATE VIEW "view_performance_rating"
 AS
 SELECT
@@ -80,6 +85,7 @@ SELECT
     END AS performance_rating
 FROM
     employees;
+
 
 -- 19.
 CREATE TABLE employees_projects (
