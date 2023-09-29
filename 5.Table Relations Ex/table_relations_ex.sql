@@ -35,6 +35,7 @@ CREATE TABLE people
     id          SERIAL PRIMARY KEY,
     first_name  VARCHAR(50),
     salary      numeric(10, 2),
+--      decimal
     passport_id INT,
     CONSTRAINT fk_people_passports
         FOREIGN KEY (passport_id)
@@ -57,18 +58,18 @@ CREATE TABLE manufacturers
 CREATE TABLE models
 (
     id INT GENERATED ALWAYS AS IDENTITY (START WITH 1000 INCREMENT BY 1) PRIMARY KEY,
-    name            VARCHAR(50),
+    model_name VARCHAR(50),
     manufacturer_id INT,
-    CONSTRAINT fk_model_manufacturers
+    CONSTRAINT fk_models_manufacturers
         FOREIGN KEY (manufacturer_id)
             REFERENCES manufacturers(id)
 
 );
 CREATE TABLE production_years
-(
+(   id SERIAL PRIMARY KEY,
     established_on  DATE,
     manufacturer_id INT,
-    CONSTRAINT fk_production_year_manufacturers
+    CONSTRAINT fk_production_years_manufacturers
         FOREIGN KEY (manufacturer_id)
             REFERENCES manufacturers(id)
 );
@@ -78,20 +79,20 @@ VALUES ('BMW'),
        ('Lada');
 
 INSERT INTO models (model_name, manufacturer_id)
-VALUES ('X11', 1),
-       ('i6', 1),
-       ('Model S', 2),
-       ('Model X', 2),
-       ('Model 3', 2),
-       ('Nova', 3);
+VALUES ('X11',1),
+       ('i6',1),
+       ('Model S',2),
+       ('Model X',2),
+       ('Model 3',2),
+       ('Nova',3);
 
 INSERT INTO production_years (established_on, manufacturer_id)
-VALUES ('1916-03-01', 1),
-       ('2003-01-01', 1),
-       ('1966-05-01', 3);
-
+VALUES ('1916-03-01',1),
+       ('2003-01-01',1),
+       ('1966-05-01',3);
 
 -- 5....
+
 
 -- 6.
 CREATE TABLE customers
@@ -104,23 +105,23 @@ CREATE TABLE customers
 CREATE TABLE photos
 (
     id    SERIAL PRIMARY KEY,
-    url         VARCHAR(255),
-    place       VARCHAR(100),
+    url         VARCHAR(50),
+    place       VARCHAR(50),
     customer_id INT,
-    constraint fk_photos_customers
-        foreign key (customer_id)
-            REFERENCES customers (id) ON DELETE CASCADE
+    CONSTRAINT fk_photos_customers
+        FOREIGN KEY (customer_id)
+            REFERENCES customers(id) ON DELETE CASCADE
 );
 INSERT INTO customers(name, date)
 VALUES ('Bella', '2022-03-25'),
        ('Philip', ' 2022-07-05');
-INSERT INTO photos(url, place)
-VALUES ('bella_1111.com', 'National Theatre'),
-       ('bella_1112.com', 'Largo'),
-       ('bella_1113.com', 'The View Restaurant'),
-       ('philip_1121.com', ' Old Town'),
-       ('philip_1122.com', 'Rowing Canal'),
-       ('philip_1123.com', 'Roman Theater');
+INSERT INTO photos(url, place,customer_id)
+VALUES ('bella_1111.com', 'National Theatre',1),
+       ('bella_1112.com', 'Largo',1),
+       ('bella_1113.com', 'The View Restaurant',1),
+       ('philip_1121.com', ' Old Town',2),
+       ('philip_1122.com', 'Rowing Canal',2),
+       ('philip_1123.com', 'Roman Theater',2);
 
 SELECT *
 FROM customers;
@@ -128,6 +129,7 @@ SELECT *
 FROM photos;
 
 -- 7.
+-- 8.
 
 CREATE TABLE students
 (
@@ -145,20 +147,24 @@ CREATE TABLE study_halls
     id   SERIAL PRIMARY KEY,
     study_hall_name VARCHAR(50),
     exam_id INT,
-     CONSTRAINT fk_students_halls_exams
+     CONSTRAINT fk_study_halls_exams
         FOREIGN KEY (exam_id)
-            REFERENCES exams (id) ON DELETE CASCADE
+            REFERENCES exams(id)
 );
 
 CREATE TABLE students_exams (
     student_id INT ,
     exam_id INT ,
+    CONSTRAINT pk_students_exams_students
+        primary key (student_id,exam_id),
     CONSTRAINT fk_students_exams_students
         FOREIGN KEY (student_id)
-            REFERENCES students (id) ON DELETE CASCADE,
-    CONSTRAINT fk_students_exams_exams
+             REFERENCES students(id),
+
+    constraint fk_students_exams_exams
         FOREIGN KEY (exam_id)
-             REFERENCES exams (id) ON DELETE CASCADE
+            REFERENCES exams(id)
+
 );
 
 INSERT INTO students(student_name)
@@ -186,24 +192,153 @@ VALUES (1 ,101),
 (2, 103);
 
 SELECT *
-FROM students_exams
-
-
-
--- 8.
+FROM students_exams;
 
 -- 9.
 
 -- 10.
+CREATE TABLE item_types(
+    id SERIAL PRIMARY KEY,
+    item_type_name VARCHAR(50)
+);
+
+CREATE TABLE cities(
+    id SERIAL PRIMARY KEY,
+    city_name VARCHAR(50)
+);
+CREATE TABLE items(
+    id SERIAL PRIMARY KEY,
+    item_name VARCHAR(50),
+    item_type_id INT,
+    CONSTRAINT fk_items_item_types
+         FOREIGN KEY (item_type_id)
+         REFERENCES item_types(id)
+    );
+
+CREATE TABLE customers(
+    id SERIAL PRIMARY KEY,
+    customer_name VARCHAR(50),
+    birthday DATE,
+    city_id INT,
+    CONSTRAINT fk_customers_cities
+        FOREIGN KEY (city_id)
+            REFERENCES cities(id)
+);
+CREATE TABLE orders(
+    id SERIAL PRIMARY KEY,
+    customer_id INT,
+    CONSTRAINT fk_orders_customers
+      FOREIGN KEY (customer_id)
+         REFERENCES customers(id)
+);
+
+
+CREATE TABLE order_items(
+    order_id INT,
+    item_id INT,
+    CONSTRAINT pk_order_items
+        primary key (order_id, item_id),
+    CONSTRAINT fk_order_items_orders
+         FOREIGN KEY (order_id)
+            REFERENCES orders(id),
+    CONSTRAINT fk_order_items_items
+        FOREIGN KEY (item_id)
+            REFERENCES items(id)
+
+);
 
 -- 11.
+ALTER TABLE
+    countries
+ADD CONSTRAINT
+        fk_countries_continents
+FOREIGN KEY
+        (continent_code)
+REFERENCES
+    continents(continent_code)
+ON DELETE CASCADE,
+
+ADD CONSTRAINT
+    fk_countries_currencies
+FOREIGN KEY
+        (currency_code)
+REFERENCES
+    currencies(currency_code)
+ON DELETE CASCADE;
 
 -- 12.
+ALTER TABLE
+    countries_rivers
+ADD CONSTRAINT
+    fk_countries_rivers_rivers
+FOREIGN KEY
+    (river_id)
+REFERENCES
+    rivers(id)
+ON UPDATE CASCADE,
+
+
+    ADD CONSTRAINT
+    fk_countries_rivers_countries
+FOREIGN KEY
+        (country_code)
+REFERENCES
+    countries(country_code)
+ON UPDATE CASCADE;
+
+
+
+-- 12.
+CREATE TABLE customers(
+    id SERIAL PRIMARY KEY,
+    customer_name VARCHAR(50)
+);
+
+
+CREATE TABLE contacts(
+    id SERIAL PRIMARY KEY,
+    contact_name VARCHAR(50),
+    phone VARCHAR(50),
+    email VARCHAR(50),
+    customer_id INT,
+    CONSTRAINT fk_contacts_customers
+    FOREIGN KEY (customer_id)
+    REFERENCES customers(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+
+);
+INSERT INTO customers(customer_name)
+VALUES ('BlueBird Inc'),
+       ('Dolphin LLC');
+INSERT INTO contacts(customer_id, contact_name,phone, email)
+VALUES (1,'John Doe',' (408)-111-1234',' john.doe@bluebird.dev'),
+        (1,'John Doe',' (408)-111-1234',' john.doe@bluebird.dev'),
+        (2,'David Wright','(408)-222-1234' ,'david.wright@dolphin.dev');
+DELETE FROM customers WHERE id = 1;
+SELECT *
+FROM customers;
+SELECT *
+FROM contacts;
+
+-- 12.
+SELECT
+    mountain_range,
+    peak_name,
+    elevation
+FROM peaks
+JOIN mountains
+ON mountain_id = mountains.id
+WHERE mountain_range LIKE '%Rila%'
+ORDER BY elevation DESC;
+
 
 -- 13.
-
-
--- 14.
-
--- 15.
+SELECT
+    count(*) as countries_without_rivers
+FROM
+    countries
+LEFT JOIN countries_rivers
+ON countries.country_code = countries_rivers.country_code
+WHERE countries_rivers.country_code IS NULL;
 
