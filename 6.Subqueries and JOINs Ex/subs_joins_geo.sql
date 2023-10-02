@@ -13,12 +13,28 @@ WHERE mc.country_code = 'BG'
 ORDER BY p.elevation DESC;
 
 -- 12.
-SELECT country_code,
-       count(*) as mountain_range_count
-FROM mountains_countries
-WHERE country_code IN ('BG', 'RU', 'US')
-group by country_code
+-- SELECT
+--         country_code,
+--        count(*) as mountain_range_count
+-- FROM mountains_countries
+-- WHERE country_code IN ('BG', 'RU', 'US')
+-- group by country_code
+-- ORDER BY mountain_range_count DESC;
+-- 12.1
+SELECT
+        country_code,
+       COUNT(*) as mountain_range_count
+FROM mountains_countries as mc
+JOIN
+    mountains as m
+ON
+    mc.mountain_id = m.id
+WHERE
+    mc.country_code IN ('BG', 'RU', 'US')
+GROUP BY
+    mc.country_code
 ORDER BY mountain_range_count DESC;
+
 
 -- 13.
 SELECT country_name,
@@ -32,13 +48,18 @@ WHERE c.continent_code = 'AF'
 ORDER BY country_name
 LIMIT 5;
 -- 14.
-SELECT MIN(avg_area) AS min_average_area
-FROM (SELECT AVG(area_in_sq_km) AS avg_area
+SELECT
+    MIN(avg_area) AS min_average_area
+FROM
+    (SELECT
+         AVG(area_in_sq_km) AS avg_area
       FROM countries
-      GROUP BY continent_code) AS min_average_are;
+      GROUP BY
+          continent_code
+      ) AS min_average_are;
 
 -- 15.
-SELECT COUNT(c.id) AS countries_without_mountains
+SELECT COUNT(*) AS countries_without_mountains
 FROM countries AS c
          LEFT JOIN mountains_countries AS mc
                    ON c.country_code = mc.country_code
@@ -78,6 +99,21 @@ VALUES
 
 -- 17.
 -- 18.
+SELECT
+    tablename,
+    indexname,
+    indexdef
+FROM pg_indexes
+WHERE schemaname = 'public'
+ORDER BY tablename  , indexname ;
+
+-- 19.
+
+
+
+
+
+
 -- 19.
 -- 20.
 -- 21.
