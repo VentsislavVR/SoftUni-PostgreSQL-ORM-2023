@@ -4,14 +4,15 @@ SELECT
     booked_for AS nights
 FROM apartments
 JOIN bookings
-ON apartments.booking_id = bookings.booking_id
-
+-- ON apartments.booking_id = bookings.booking_id
+USING (booking_id)
 ORDER BY apartments.apartment_id;
 -- 2.
 SELECT
     ap.name,
     ap.country,
-    date(b.booked_at)
+--     date(b.booked_at)
+    b.booked_at ::date
 FROM apartments AS ap
 LEFT JOIN bookings AS b
 ON ap.booking_id = b.booking_id
@@ -30,18 +31,37 @@ ON b.customer_id = c.customer_id
 ORDER BY customer_name
 LIMIT 10;
 -- 4.
+-- SELECT
+--     b.booking_id,
+--     a.name AS "apartment_owner",
+--     a.apartment_id,
+--     CONCAT(c.first_name,' ',c.last_name) AS "customer_name"
+--
+-- FROM bookings AS b
+--     FULL JOIN  apartments AS a ON
+--         a.booking_id = b.booking_id
+--     FULL JOIN customers AS c
+--         ON b.customer_id = c.customer_id
+-- ORDER BY b.booking_id,apartment_owner,customer_name;
+-- 4.1
 SELECT
     b.booking_id,
     a.name AS "apartment_owner",
     a.apartment_id,
     CONCAT(c.first_name,' ',c.last_name) AS "customer_name"
 
-FROM bookings AS b
-    FULL JOIN  apartments AS a ON
-        a.booking_id = b.booking_id
-    FULL JOIN customers AS c
-        ON b.customer_id = c.customer_id
-ORDER BY b.booking_id,apartment_owner,customer_name;
+FROM
+    apartments as a
+FULL JOIN
+        bookings as b
+USING
+    (booking_id)
+FULL JOIN
+    customers as c
+USING
+    (customer_id)
+ORDER BY
+    b.booking_id,apartment_owner,customer_name;
 
 -- 5.
 SELECT
@@ -58,7 +78,7 @@ SELECT
     c.companion_full_name
 FROM bookings AS b
 JOIN customers AS c
-ON b.customer_id = c.customer_id
+USING (customer_id)
 where b.apartment_id IS NULL;
 
 -- 7.
@@ -92,13 +112,13 @@ GROUP BY a.name
 ORDER BY name;
 
 
--- 10.
+-- 10. !!
 SELECT
     country,
     count(b.booking_id) AS booking_count
 FROM bookings AS b
 JOIN apartments as a
-    ON b.booking_id = a.booking_id
+    using (apartment_id)
 WHERE
     b.booked_at >='2021-05-18 07:52:09.904+03'
     AND
@@ -106,4 +126,5 @@ WHERE
 
 GROUP BY country
 ORDER BY booking_count DESC;
+
 
