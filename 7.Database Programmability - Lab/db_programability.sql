@@ -208,7 +208,7 @@ AS
         end
     $$
 LANGUAGE plpgsql;
-call sp_increase_salaries('Marketing')
+call sp_increase_salaries('Marketing');
 
 
 
@@ -228,4 +228,158 @@ call sp_increase_salaries('Marketing')
 --
 -- SELECT fn_test_func('Koko','Boko')
 
+-- ################################################################
+-- TRANSACTIONS EXAMPLE bank table
+
+CREATE OR REPLACE PROCEDURE p_transfer_money(
+        IN sender_id INT,
+        IN receiver_id INT,
+        IN transfer_amount FLOAT,
+        OUT status VARCHAR
+)
+    AS
+    $$
+    DECLARE
+        sender_amount FLOAT;
+        receiver_amount FLOAT;
+        temp_val FLOAT;
+    BEGIN
+    SELECT b.amount FROM bank as b WHERE id = sender_id INTO sender_amount;
+    IF sender_amount < transfer_amount THEN
+        status := 'Not enough money';
+        RETURN ;
+    end if;
+    SELECT b.amount FROM bank as b WHERE id =  receiver_id INTO receiver_amount;
+    UPDATE bank SET amount = amount -transfer_amount WHERE id = sender_id;
+    UPDATE bank SET amount = amount + transfer_amount WHERE id = receiver_id;
+    SELECT b.amount FROM bank as b WHERE id = sender_id INTO temp_val;
+    IF sender_amount - transfer_amount <> temp_val THEN
+        status = 'Error in sender';
+        ROLLBACK;
+        RETURN;
+    END IF;
+    SELECT b.amount FROM bank as b WHERE id = receiver_id INTO temp_val;
+    IF receiver_amount + transfer_amount <> temp_val THEN
+        status = 'Error in receiver';
+        ROLLBACK;
+        RETURN;
+
+    end if;
+    status = 'Success'
+    commit;
+    return;
+    end;
+    $$
+LANGUAGE plpgsql;
+
+SELECT * FROM bank;
+
+call p_transfer_money(1,2,300,null);
+
 -- 3.
+CREATE PROCEDURE sp_increase_salary_by_id(id INT)
+AS
+$$
+    BEGIN
+        IF (SELECT salary FROM employees WHERE employee_id = id) IS NULL THEN
+            RETURN;
+        ELSE
+            UPDATE employees SET salary = salary +salary * 0.05 WHERE employee_id = id;
+        END IF;
+        COMMIT;
+
+    END
+$$
+LANGUAGE plpgsql;
+
+
+-- ####
+
+-- TRIGGERS EXAMPLE items/items_log tables
+
+CREATE OR REPLACE FUNCTION log_items()
+RETURNS TRIGGER AS
+$$
+    BEGIN
+        INSERT INTO items_log(status,create_date)
+        VALUES(NEW.status,NEW.create_date);
+        RETURN NEW;
+    END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER log_items_trigger
+AFTER INSERT ON items
+FOR EACH ROW
+EXECUTE PROCEDURE log_items();
+
+INSERT INTO items(status, create_date)
+VALUES(1,NOW()),
+      (2,NOW()),
+      (3,NOW()),
+      (3,NOW())
+;
+SELECT * FROM items;
+
+-- ################################################################
+CREATE OR REPLACE FUNCTION delete_last_item_log()
+RETURNS TRIGGER AS
+$$
+    BEGIN
+        WHILE (SELECT count(*) FROM items_log) > 10 LOOP
+            delete from items_log WHERE id=(SELECT MIN(id) FROM items_log);
+        END LOOP;
+        return new;
+    end;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER clear_item_log
+AFTER INSERT ON items_log
+FOR EACH STATEMENT
+EXECUTE PROCEDURE delete_last_item_log();
+
+
+SELECT * FROM items_log;
+
+-- 4.
+CREATE TABLE deleted_employees(
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(20),
+    last_name VARCHAR(20),
+    middle_name VARCHAR(20),
+    job_title VARCHAR(50),
+    department_id INT,
+    salary numeric(19,4)
+
+);
+CREATE OR REPLACE FUNCTION backup_fired_employees()
+RETURNS TRIGGER AS
+    $$
+        BEGIN
+            INSERT INTO deleted_employees(
+                first_name,
+                last_name,
+                middle_name,
+                job_title,
+                department_id,
+                salary
+
+            )
+            VALUES (
+                    old.first_name,
+                    old.last_name,
+                    old.middle_name,
+                    old.job_title,
+                    old.department_id,
+                    old.salary
+                   );
+            RETURN new;
+        end;
+    $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER backup_employees
+AFTER DELETE ON employees
+FOR EACH ROW
+EXECUTE PROCEDURE backup_fired_employees();
