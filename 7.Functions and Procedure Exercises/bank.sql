@@ -16,11 +16,6 @@
 -- WHERE total_balance > 200000
 -- GROUP BY a.id;
 
-
-
-
-
-
 -- 8.
 CREATE OR REPLACE PROCEDURE sp_deposit_money
     (account_id INT,
