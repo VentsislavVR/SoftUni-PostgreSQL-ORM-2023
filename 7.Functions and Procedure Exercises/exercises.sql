@@ -1,4 +1,4 @@
--- 1.
+-- 1. || is recommended must show null when one of the two is null
 CREATE OR REPLACE FUNCTION fn_full_name(first_name VARCHAR, last_name VARCHAR)
 RETURNS VARCHAR AS
 $$
@@ -25,13 +25,13 @@ SELECT  fn_full_name('bate','venci');
 
 -- 2.
 CREATE OR REPLACE FUNCTION fn_calculate_future_value(
-    initial_sum NUMERIC,
-    yearly_interest_rate NUMERIC,
+    initial_sum DECIMAL,
+    yearly_interest_rate DECIMAL,
     number_of_years INT
 ) RETURNS NUMERIC AS
 $$
 DECLARE
-    future_value NUMERIC;
+    future_value DECIMAL;
 BEGIN
     future_value := initial_sum * POWER(1 + yearly_interest_rate, number_of_years);
     RETURN trunc(future_value, 4);
