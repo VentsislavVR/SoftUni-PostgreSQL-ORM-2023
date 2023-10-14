@@ -297,5 +297,7 @@ $$
 $$
 language plpgsql;
 
+SELECT * FROM search_results;
+CALL sp_courses_by_address('Sofia');
 
 

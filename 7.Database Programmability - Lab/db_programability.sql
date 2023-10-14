@@ -55,7 +55,7 @@
 --     DECLARE
 --         city_id INT;
 --     BEGIN
---         SELECT id(INTO city_id can be placed here) FROM cities
+--         SELECT id(INTO city_id //<-can be placed here//) FROM cities
 --         WHERE name = city_name
 --         INTO city_id;
 --         RETURN city_id;
