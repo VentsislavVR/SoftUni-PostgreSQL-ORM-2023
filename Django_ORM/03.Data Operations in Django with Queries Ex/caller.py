@@ -1,31 +1,27 @@
 import os
 import django
 
-
-
 # Set up Django
+from django.db.models import QuerySet, F
+
+
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "orm_skeleton.settings")
 django.setup()
 
-# Import your models here
-from main_app.models import Pet, Artifact, Location, Car, Task, HotelRoom
+from main_app.models import Pet, Artifact, Location, Car, Task, HotelRoom, Character
 
 
-# Create queries within functions
-def create_pet(name:str,species:str):
+def create_pet(name: str, species: str) -> str:
     pet = Pet.objects.create(
         name=name,
         species=species,
     )
-    pet.save()
+
     return f"{pet.name} is a very cute {pet.species}!"
 
-# print(create_pet('Buddy', 'Dog'))
-# print(create_pet('Whiskers', 'Cat'))
-# print(create_pet('Rocky', 'Hamster'))
-#
 
-def create_artifact(name:str,origin:str,age:int,description:str,is_magical:bool):
+def create_artifact(name: str, origin: str, age: int, description: str, is_magical: bool) -> str:
     artifact = Artifact.objects.create(
         name=name,
         origin=origin,
@@ -33,111 +29,179 @@ def create_artifact(name:str,origin:str,age:int,description:str,is_magical:bool)
         description=description,
         is_magical=is_magical,
     )
-    artifact.save()
+
     return f"The artifact {artifact.name} is {artifact.age} years old!"
 
-def delete_all_artifacts():
+
+def delete_all_artifacts() -> None:
     Artifact.objects.all().delete()
 
-def show_all_locations():
-    locs = Location.objects.all().order_by('-id')
-    res = []
-    for l in locs:
-        res.append(f"{l.name} has a population of {l.population}!")
 
-    return '\n'.join(res)
+def show_all_locations() -> str:
+    locations = Location.objects.all().order_by('-id')
+
+    return '\n'.join(str(l) for l in locations)
 
 
-def new_capital():
-    new_c = Location.objects.filter().first()
-    if new_c is not None:
-        new_c.is_capital = True
-        new_c.save()
+def new_capital() -> None:
+    # Location.objects.filter(pk=1).update(is_capital=True)
 
-def get_capitals():
+    location = Location.objects.first()
+    location.is_capital = True
+    location.save()
 
-    capitals_loc = Location.objects.filter(is_capital=True)
 
-    capitals_names = capitals_loc.values('name')
-    return capitals_names
-def delete_first_location():
+def get_capitals() -> QuerySet:
+    return Location.objects.filter(is_capital=True).values('name')
+
+
+def delete_first_location() -> None:
     Location.objects.first().delete()
 
 
-def apply_discount():
+def apply_discount() -> None:
     cars = Car.objects.all()
-    for c in cars:
-        discount = sum(int(x) for x in str(c.year))
-        c.price_with_discount = float(c.price) - (float(c.price) * (float(discount) / 100.0))
-        c.save()
+
+    for car in cars:
+        percentage_off = sum(int(x) for x in str(car.year)) / 100
+        discount = float(car.price) * percentage_off
+        car.price_with_discount = float(car.price) - discount
+        car.save()
 
 
-def get_recent_cars():
-    recent_cars = Car.objects.filter(year__gte=2020)
-    return recent_cars.values('model','price_with_discount')
-                    # .only(models , price_with etc)
-def delete_last_car():
+def get_recent_cars() -> QuerySet:
+    return Car.objects.filter(year__gte=2020).values('model', 'price_with_discount')
+
+
+def delete_last_car() -> None:
     Car.objects.last().delete()
 
-# def show_unfinished_tasks():
-#     unfinished = Task.objects.filter(is_finished=False)
-#     result = []
-#     for u in unfinished:
-#         result.append(f"Task - {u.title} needs to be done until {u.due_date}!")
-#     return '\n'.join(result)
-def show_unfinished_tasks():
+
+def show_unfinished_tasks() -> str:
     unfinished_tasks = Task.objects.filter(is_finished=False)
-    result = [f"Task - {task.title} needs to be done until {task.due_date}!" for task in unfinished_tasks]
-    return '\n'.join(result)
+
+    return '\n'.join(str(t) for t in unfinished_tasks)
 
 
-def complete_odd_tasks():
-    odd_task_ids = [task.id for task in Task.objects.all() if task.id % 2 != 0]
-    Task.objects.filter(id__in=odd_task_ids).update(is_finished=True)
+def complete_odd_tasks() -> None:
+    for task in Task.objects.all():
+        if task.id % 2 != 0:
+            task.is_finished = True
+            task.save()
 
 
-def encode_and_replace(text: str, task_title: str):
-    task = Task.objects.get(title=task_title)
-    new_description = []
-    for char in text:
-        enc = ord(char) - 3
-        new_description.append(chr(enc))
-    task.description = ''.join(new_description)
-    task.save()
+def encode_and_replace(text: str, task_title: str) -> None:
+    decoded_text = ''.join(chr(ord(x) - 3) for x in text)
 
-# TODO fix
-def get_deluxe_rooms():
-    deluxe_rooms = HotelRoom.objects.filter(room_type='Deluxe')
+    # Task.objects.filter(title=task_title).update(description=decoded_text)
 
-    room_info_list = []
+    tasks_with_matching_title = Task.objects.filter(title=task_title)
+    decoded_text = ''.join(chr(ord(x) - 3) for x in text)
+
+    for task in tasks_with_matching_title:
+        task.description = decoded_text
+        task.save()
+
+
+def get_deluxe_rooms() -> str:
+    deluxe_rooms = HotelRoom.objects.filter(room_type="Deluxe")
+    even_id_deluxe_rooms = []
 
     for room in deluxe_rooms:
         if room.id % 2 == 0:
-            room_info = f"Deluxe room with number {room.room_number} costs {room.price_per_night}$ per night!"
-            room_info_list.append(room_info)
+            even_id_deluxe_rooms.append(str(room))
 
-    return '\n'.join(room_info_list)
+    return '\n'.join(even_id_deluxe_rooms)
 
-def increase_room_capacity():
-    rooms = HotelRoom.objects.order_by('room_number')
 
-    for i, room in enumerate(rooms):
-        if rooms.last() or rooms.first() == room:
+def increase_room_capacity() -> None:
+    rooms = HotelRoom.objects.all().order_by("id")
+
+    previous_room_capacity = None
+
+    for room in rooms:
+        if not room.is_reserved:
+            continue
+
+        if previous_room_capacity:
+            room.capacity += previous_room_capacity
+        else:
             room.capacity += room.id
 
-        else:
-            previous_room = rooms[i + 1]
-            room.capacity += previous_room.capacity
+        previous_room_capacity = room.capacity
+
         room.save()
 
 
-def reserve_first_room():
+def reserve_first_room() -> None:
     first_room = HotelRoom.objects.first()
-    if first_room:
-        first_room.is_reserved = True
-        first_room.save()
+    first_room.is_reserved = True
+    first_room.save()
 
-def delete_last_room():
-    HotelRoom.objects.last().delete()
 
-#TODO 7
+def delete_last_room() -> None:
+    last_room = HotelRoom.objects.last()
+
+    if last_room.is_reserved:
+        last_room.delete()
+
+
+def update_characters() -> None:
+    Character.objects.filter(class_name='Mage').update(
+        level=F('level') + 3,
+        intelligence=F('intelligence') - 7
+    )
+
+    Character.objects.filter(class_name='Warrior').update(
+        hit_points=F('hit_points') / 2,
+        dexterity=F('dexterity') + 4,
+    )
+
+    Character.objects.filter(class_name__in=["Assassin", "Scout"]).update(
+        inventory="The inventory is empty",
+    )
+
+
+def fuse_characters(first_character: Character, second_character: Character) -> None:
+    fusion_name = first_character.name + " " + second_character.name
+    fusion_level = (first_character.level + second_character.level) // 2
+    fusion_class = "Fusion"
+    fusion_strength = (first_character.strength + second_character.strength) * 1.2
+    fusion_dexterity = (first_character.dexterity + second_character.dexterity) * 1.4
+    fusion_intelligence = (first_character.intelligence + second_character.intelligence) * 1.5
+    fusion_hit_points = (first_character.hit_points + second_character.hit_points)
+
+    if first_character.class_name in ["Mage", "Scout"]:
+        fusion_inventory = "Bow of the Elven Lords, Amulet of Eternal Wisdom"
+    else:
+        fusion_inventory = "Dragon Scale Armor, Excalibur"
+
+    Character.objects.create(
+        name=fusion_name,
+        class_name=fusion_class,
+        level=fusion_level,
+        strength=fusion_strength,
+        dexterity=fusion_dexterity,
+        intelligence=fusion_intelligence,
+        hit_points=fusion_hit_points,
+        inventory=fusion_inventory,
+    )
+
+    first_character.delete()
+    second_character.delete()
+
+
+def grand_dexterity() -> None:
+    Character.objects.update(dexterity=30)
+
+
+def grand_intelligence() -> None:
+    Character.objects.update(intelligence=40)
+
+
+def grand_strength() -> None:
+    Character.objects.update(strength=50)
+
+
+def delete_characters() -> None:
+    Character.objects.filter(inventory="The inventory is empty").delete()
