@@ -88,7 +88,7 @@ def delete_review_by_id(r_id):
     return f"Review by {person.reviewer_name} was deleted"
 
 def filter_authors_by_nationalities(nationality):
-    author = Author.objects.filter(
+    authors = Author.objects.filter(
         nationality=nationality.order_by(
             'first_name', 'last_name')
     )
@@ -97,6 +97,7 @@ def filter_authors_by_nationalities(nationality):
         author.biography
         if author.biography
         else f"{author.first_name} {author.last_name}"
+        for author in authors
     ]
     return '\n'.join(result)
 
@@ -107,5 +108,33 @@ def filter_authors_by_nationalities(nationality):
 #                       for author in Author.objects.filter(nationality=nationality)])
 #
 
-def filter_authors_by_birth_year():
-    ...
+def filter_authors_by_birth_year(year_one, year_two):
+
+    authors = Author.objects.filter(birth_date__year__range=(year_one, year_two)).order_by('birth_date')
+    result = [
+             f"{author.birth_date}: {author.first_name} {author.last_name}"
+        for author in authors
+    ]
+    return '\n'.join(result)
+
+
+def change_reviewer_name(rev_name,new_name):
+    Review.objects.filter(reviewer_name=rev_name).update(reviewer_name=new_name)
+
+    return Review.objects.all()
+
+print("Change Alice Johnson to A.J.:")
+
+print(change_reviewer_name("Alice Johnson", "A.J."))
+
+print()
+
+print("Change Bob Wilson to Bobby W.:")
+
+print(change_reviewer_name("Bob Wilson", "Bobby W."))
+
+print()
+
+print("Change A.J. to A. Johnson:")
+
+print(change_reviewer_name("A.J.", "A. Johnson"))
