@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="db" uuid="9a05a579-d3da-4bce-9ab5-5be04142e4b4">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:D:\GIT Repos\SoftUni-PostgreSQL-ORM 2023\SoftUni-PostgreSQL-ORM-2023\Django_ORM\04.Working with Queries in Django Ex\05-skeleton\db.sqlite3</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+      <libraries>
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.43.0/org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar</url>
+        </library>
+      </libraries>
+    </data-source>
+  </component>
+</project>

@@ -123,18 +123,3 @@ def change_reviewer_name(rev_name,new_name):
 
     return Review.objects.all()
 
-print("Change Alice Johnson to A.J.:")
-
-print(change_reviewer_name("Alice Johnson", "A.J."))
-
-print()
-
-print("Change Bob Wilson to Bobby W.:")
-
-print(change_reviewer_name("Bob Wilson", "Bobby W."))
-
-print()
-
-print("Change A.J. to A. Johnson:")
-
-print(change_reviewer_name("A.J.", "A. Johnson"))
