@@ -7,3 +7,5 @@ class ProductManager(models.Manager):
 
     def available_products_in_category(self,category_name:str):
         return self.filter(is_available=True).filter(category__name=category_name)
+
+
