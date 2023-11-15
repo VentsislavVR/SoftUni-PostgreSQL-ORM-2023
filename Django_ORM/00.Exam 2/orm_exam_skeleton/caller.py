@@ -1,5 +1,6 @@
 import os
 import django
+from django.db import transaction
 from django.db.models import Q, Count, F
 
 # Set up Django
@@ -38,8 +39,6 @@ def get_loyal_profiles():
     return ''
 
 
-
-
 def get_last_sold_products():
     last_sold_products = Order.objects.prefetch_related('products').order_by('-creation_date')
     if last_sold_products:
@@ -54,15 +53,18 @@ def get_last_sold_products():
 
 
 def get_top_products():
-    top_sold_products = (
-        Product.objects
-        .annotate(num_orders=Count('orders__id', distinct=True))
-        .order_by('-num_orders', 'name'))[:5]
-    res = ['Top products:',]
-    for product in top_sold_products:
-        res.append(f"{product.name}, sold {product.num_orders} times")
 
-    return '\n'.join(res)
+        top_sold_products = (
+            Product.objects
+            .annotate(num_orders=Count('orders__id', distinct=True))
+            .order_by('-num_orders', 'name'))[:5]
+        if top_sold_products:
+            res = ['Top products:',]
+            for product in top_sold_products:
+                res.append(f"{product.name}, sold {product.num_orders} times")
+
+            return '\n'.join(res)
+        return ''
 
 def apply_discounts():
     # Filter orders with more than two products and is_completed=False
@@ -71,21 +73,29 @@ def apply_discounts():
     num_of_orders_to_update = orders_to_update.count()
 
     if num_of_orders_to_update > 0:
-        orders_to_update.update(total_price=F('total_price') * 0.234)
+        orders_to_update.update(total_price=F('total_price') * 0.9)
 
     return f"Discount applied to {num_of_orders_to_update} orders."
-#TODO
+
+
 def complete_order():
-    order_to_complete = Order.objects.all().first()
 
-    if not order_to_complete.is_complete:
-        order_to_complete.is_complete = True
-        for order in order_to_complete:
-            order.product_set -= order.products_set.in_stock
+    order_to_complete = Order.objects.prefetch_related('products').filter(is_completed=False).first()
+    if not order_to_complete:
+        return ''
+    if order_to_complete:
+        for product in order_to_complete.products.all():
+            if product.in_stock<= 0:
+                product.is_available = False
+            else:
+                product.is_available = True
+                product.in_stock -= 1
+                product.save()
 
+        order_to_complete.is_completed = True
+        order_to_complete.save()
 
+        return "Order has been completed!"
+    else:
+         return ""
 
-    return order_to_complete
-
-
-print(complete_order())
