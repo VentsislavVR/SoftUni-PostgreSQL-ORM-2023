@@ -28,3 +28,14 @@ Session = sessionmaker(bind=engine)
 #         print('Successfully updated')
 #     else:
 #         print('Failed to update/user not found')
+
+# DELETE
+# with Session() as session:
+#     user_to_delete = session.query(User).filter_by(username='john doe').first()
+#
+#     if user_to_delete:
+#         session.delete(user_to_delete)
+#         session.commit()
+#         print('Successfully deleted')
+#     else:
+#         print('Failed to delete user ')

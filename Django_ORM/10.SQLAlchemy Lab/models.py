@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String,create_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String, create_engine, Boolean, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
 
 from settings import DATABASE_URL
 
@@ -13,4 +13,11 @@ class User(Base):
     username = Column(String)
     email = Column(String)
 
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
+
+class Order(Base):
+    __tablename__ = 'orders'
+    id = Column(Integer, primary_key=True)
+    is_completed = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    user = relationship('User')
